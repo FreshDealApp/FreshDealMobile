@@ -1,15 +1,16 @@
 import * as AppleAuthentication from "expo-apple-authentication";
-import { Alert, Platform, StyleSheet, View } from "react-native";
+import {Alert, Platform, StyleSheet, View} from "react-native";
 import React from "react";
-import {scaleFont} from "@/utils/ResponsiveFont";
+import {scaleFont} from "@/components/utils/ResponsiveFont";
+
 interface AppleOTPProps {
     onSuccess?: (user: string) => void; // Optional success callback
 }
 
-const AppleOTP: React.FC<AppleOTPProps> = ({ onSuccess }) => {
+const AppleOTP: React.FC<AppleOTPProps> = ({onSuccess}) => {
     if (Platform.OS === 'ios') {
         return (
-        
+
             <View style={styles.container}>
                 <AppleAuthentication.AppleAuthenticationButton
                     buttonType={AppleAuthentication.AppleAuthenticationButtonType.SIGN_IN}
@@ -25,7 +26,7 @@ const AppleOTP: React.FC<AppleOTPProps> = ({ onSuccess }) => {
                                 ],
                             });
                             Alert.alert('Apple Sign-In Success', `User: ${credential.user}`);
-                            onSuccess ? onSuccess(credential.user) : null ; // Call success callback if provided
+                            onSuccess ? onSuccess(credential.user) : null; // Call success callback if provided
                         } catch (e: any) {
                             if (e.code === 'ERR_CANCELED') {
                                 Alert.alert('Sign-In Canceled', 'You canceled the sign-in process.');
@@ -37,9 +38,9 @@ const AppleOTP: React.FC<AppleOTPProps> = ({ onSuccess }) => {
                 />
             </View>
         );
-        }
-    
-    
+    }
+
+
 };
 
 const styles = StyleSheet.create({
@@ -51,7 +52,7 @@ const styles = StyleSheet.create({
         height: 50,
         width: '100%',
         shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
+        shadowOffset: {width: 0, height: 2},
         shadowOpacity: 0.2,
         shadowRadius: 4,
         elevation: 5, // Android shadow

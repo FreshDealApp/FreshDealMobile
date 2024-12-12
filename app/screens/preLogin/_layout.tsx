@@ -1,14 +1,14 @@
 // app/screens/loginRegister/_layout.tsx
 
-import { Slot, usePathname } from "expo-router";
-import React, { useEffect, useRef, useState } from 'react';
-import { Animated, Dimensions, StyleSheet, Platform, Easing } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
-import { scaleFont } from "@/utils/ResponsiveFont";
+import {Slot, usePathname} from "expo-router";
+import React, {useEffect, useRef, useState} from 'react';
+import {Animated, Dimensions, Easing, Platform, StyleSheet} from 'react-native';
+import {LinearGradient} from 'expo-linear-gradient';
+import {scaleFont} from "@/components/utils/ResponsiveFont";
 
 export default function RootLayout() {
     // Get screen dimensions
-    const { height: screenHeight, width: screenWidth } = Dimensions.get('window');
+    const {height: screenHeight, width: screenWidth} = Dimensions.get('window');
 
     /*
     Determine if the screen is considered small, if its small then the logo won't be shown to allow full visibility on main view at the bottom side */
@@ -156,8 +156,8 @@ export default function RootLayout() {
     return (
         <LinearGradient
             colors={['#B2F7A5', '#ecffe8']}
-            start={{ x: 0.5, y: 0 }}
-            end={{ x: 0.5, y: 1 }}
+            start={{x: 0.5, y: 0}}
+            end={{x: 0.5, y: 1}}
             style={styles.container}
         >
             {showImage && (
@@ -166,7 +166,7 @@ export default function RootLayout() {
                     style={[
                         styles.logo,
                         {
-                            transform: [{ translateY: imagePosition }, { scale: imageScale }],
+                            transform: [{translateY: imagePosition}, {scale: imageScale}],
                             opacity: imageOpacity,
                         },
                     ]}
@@ -177,7 +177,7 @@ export default function RootLayout() {
                 style={[
                     styles.main,
                     {
-                        transform: [{ translateY: formPosition }],
+                        transform: [{translateY: formPosition}],
                         opacity: scrollViewOpacity,
                         height: isSmallScreen ? '100%' : screenHeight * 1.1,
                     },
@@ -186,11 +186,11 @@ export default function RootLayout() {
                 <Animated.View
                     style={{
                         flex: 1,
-                        transform: [{ translateX: slotTranslateX }],
+                        transform: [{translateX: slotTranslateX}],
                         opacity: slotOpacity,
                     }}
                 >
-                    <Slot />
+                    <Slot/>
                 </Animated.View>
             </Animated.View>
         </LinearGradient>
@@ -206,7 +206,7 @@ const styles = StyleSheet.create({
         width: scaleFont(150),
         height: scaleFont(150),
         marginTop: scaleFont(60),
-        marginBottom: scaleFont(0),
+        // marginBottom: scaleFont(0),
     },
     main: {
         overflow: 'hidden',
@@ -219,7 +219,7 @@ const styles = StyleSheet.create({
         ...Platform.select({
             ios: {
                 shadowColor: '#000', // Shadow color for iOS
-                shadowOffset: { width: 0, height: -3 }, // Shadow offset for iOS
+                shadowOffset: {width: 0, height: -3}, // Shadow offset for iOS
                 shadowOpacity: 0.1, // Shadow opacity for iOS
                 shadowRadius: 5, // Shadow radius for iOS
             },

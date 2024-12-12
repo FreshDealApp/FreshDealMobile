@@ -1,15 +1,8 @@
 # FreshDealMobile
 
-1. commit a change
-  - ``` git commit -m "FRESHDEAL-19 Project Start" ```
-  - ``` git push origin main```
+## Tech Stack
 
-2. working on a new branch
-
-  - ``` git checkout -b FRESHDEAL-20-Github-Jira-Integration ```
-  - ``` git add .\README.md ```
-  - ``` git commit -m "FRESHDEAL-20 Test" ```
-  - ``` git push origin FRESHDEAL-20-Github-Jira-Integration ```
-
---------------
-
+![Expo](https://img.shields.io/badge/expo-1C1E24?style=for-the-badge&logo=expo&logoColor=#D04A37)
+![Redux](https://img.shields.io/badge/redux-%23593d88.svg?style=for-the-badge&logo=redux&logoColor=white)
+![React Native](https://img.shields.io/badge/react_native-%2320232a.svg?style=for-the-badge&logo=react&logoColor=%2361DAFB)
+![TypeScript](https://img.shields.io/badge/typescript-%23007ACC.svg?style=for-the-badge&logo=typescript&logoColor=white)

@@ -1,53 +1,66 @@
-// components/LoginScreenComponents/NameSurnameInputField.tsx
+import React, {useEffect, useState} from 'react';
+import {StyleSheet, Text, TextInput, TouchableOpacity, View} from 'react-native';
+import {scaleFont} from "@/components/utils/ResponsiveFont";
+import {useDispatch, useSelector} from 'react-redux';
+import {setName} from '../../store/userSlice'; // Adjust the path as needed
+import {RootState} from '../../store/store'; // Adjust the path as needed
 
-import React, { useState, useEffect } from 'react';
-import { TouchableOpacity, TextInput, StyleSheet, View, Keyboard } from 'react-native';
-import {scaleFont} from "@/utils/ResponsiveFont";
-import {UserModel} from "@/models/UserModel";
-import {validateName} from "@/components/utils/validationUtils";
-const NameSurnameField = () => {
-    const user = UserModel.getInstance();
-    const [fullName, setFullName] = useState<string>(user.getFullName() || '');
+const NameSurnameInputField: React.FC = () => {
+    const dispatch = useDispatch();
+    const fullName = useSelector((state: RootState) => state.user.name_surname); // Single name field from Redux
+
+    const [inputValue, setInputValue] = useState<string>(fullName); // Local input state
+    const [isTyping, setIsTyping] = useState<boolean>(inputValue.length > 0);
+
+    useEffect(() => {
+        // Sync with Redux store if it changes
+        setInputValue(fullName);
+    }, [fullName]);
 
     const handleTextChange = (text: string) => {
         // Remove any non-letter characters except for spaces
         const cleanedText = text.replace(/[^a-zA-Z\s]/g, '');
-        setFullName(cleanedText);
-        updateUserModel(cleanedText);
+        setInputValue(cleanedText);
+
+        if (cleanedText.length === 0) {
+            setIsTyping(false);
+            dispatch(setName(''));
+        } else {
+            setIsTyping(true);
+            dispatch(setName(cleanedText)); // Update Redux store with a single string
+        }
     };
 
-    const updateUserModel = (name: string) => {
-        const names = name.trim().split(/\s+/);
-        const firstName = names.slice(0, -1).join(' ') || names[0] || '';
-        const surname = names.length > 1 ? names[names.length - 1] : '';
-        user.setName(firstName);
-        user.setSurname(surname);
+    const handleClearText = () => {
+        setInputValue('');
+        setIsTyping(false);
+        dispatch(setName(''));
     };
-
-    useEffect(() => {
-        // Initialize UserModel with current fullName
-        updateUserModel(fullName);
-    }, []);
 
     return (
-        <View style={styles.container}>
-            <TouchableOpacity style={styles.inputContainer} onPress={() => Keyboard.dismiss()}>
+        <View>
+            <View style={[styles.inputContainer, isTyping && {borderColor: 'gray'}]}>
                 <TextInput
                     style={styles.input}
-                    placeholder="Enter your full name"
-                    value={fullName}
+                    placeholder="Enter your name"
+                    placeholderTextColor="#999"
+
+                    value={inputValue}
                     onChangeText={handleTextChange}
                     onFocus={() => console.log("Name Input Focused")}
+                    autoCapitalize="words"
                 />
-            </TouchableOpacity>
+                {isTyping && (
+                    <TouchableOpacity onPress={handleClearText} style={styles.clearButton}>
+                        <Text style={styles.clearButtonText}>X</Text>
+                    </TouchableOpacity>
+                )}
+            </View>
         </View>
     );
 };
 
 const styles = StyleSheet.create({
-    container: {
-        width: '100%',
-    },
     inputContainer: {
         flexDirection: 'row',
         alignItems: 'center',
@@ -66,6 +79,15 @@ const styles = StyleSheet.create({
         color: '#1a1818',
         fontFamily: 'Poppins-Regular',
     },
+    clearButton: {
+        paddingHorizontal: scaleFont(10),
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    clearButtonText: {
+        color: '#999',
+        fontSize: scaleFont(16),
+    },
 });
 
-export default NameSurnameField;
+export default NameSurnameInputField;

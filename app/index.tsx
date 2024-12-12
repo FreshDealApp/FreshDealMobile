@@ -16,7 +16,7 @@ const Index = () => {
         // are completed before the navigation logic is triggered.
         const timer = setTimeout(() => {
             // Navigate to the LoginPage after the slight asynchronous break
-            router.push('/screens/loginPage');
+            router.push('/screens/preLogin/loginPage');
         }, 0); // 0ms delay ensures minimal delay while still deferring execution
 
         // Cleanup function to clear the timer when the component unmounts
