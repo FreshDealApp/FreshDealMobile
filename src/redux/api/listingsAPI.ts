@@ -1,3 +1,4 @@
+// src/redux/api/listingsAPI.ts
 import axios from "axios";
 import {logError, logRequest, logResponse} from "@/src/utils/logger";
 import {API_BASE_URL} from "@/src/redux/api/API";
@@ -12,7 +13,6 @@ export const getListingsAPI = async (params: { restaurantId: number; page?: numb
 }> => {
     const functionName = "getListingsAPI";
 
-    // Adjusting endpoint for proper query parameter handling
     const queryParams = {
         restaurant_id: params.restaurantId,
         page: params.page,

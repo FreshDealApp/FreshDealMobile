@@ -8,6 +8,7 @@ import {CommentAnalysis} from "@/src/types/states";
 const RESTAURANTS_ENDPOINT = `${API_BASE_URL}/restaurants`;
 const GET_RESTAURANTS_IN_PROXIMITY_API_ENDPOINT = `${RESTAURANTS_ENDPOINT}/proximity`;
 const GET_RECENT_RESTAURANTS_ENDPOINT = `${API_BASE_URL}/user/recent-restaurants`;
+const GET_FLASH_DEALS_ENDPOINT = `${API_BASE_URL}/flash-deals`;
 
 export const getRecentRestaurants = async (token: string): Promise<any> => {
     const functionName = 'getRecentRestaurants';
@@ -108,27 +109,6 @@ export const createRestaurant = async (
         throw error;
     }
 };
-
-export const deleteRestaurant = async (
-    restaurantId: number,
-    token: string
-): Promise<void> => {
-    const functionName = 'deleteRestaurant';
-    const endpoint = `${RESTAURANTS_ENDPOINT}/${restaurantId}`;
-
-    logRequest(functionName, endpoint, {});
-
-    try {
-        const response = await axios.delete(endpoint, {
-            headers: {Authorization: `Bearer ${token}`},
-        });
-        logResponse(functionName, endpoint, response.data);
-    } catch (error: any) {
-        logError(functionName, endpoint, error);
-        throw error;
-    }
-};
-
 
 export const updateRestaurant = async (
     restaurantId: number,
@@ -247,6 +227,47 @@ export const getRestaurantComments = async (restaurantId: number): Promise<any> 
         }
 
         return response.data.comments;
+    } catch (error: any) {
+        logError(functionName, endpoint, error);
+        throw error;
+    }
+};
+
+export const deleteRestaurant = async (restaurantId: number, token: string): Promise<void> => {
+    const functionName = 'deleteRestaurant';
+    const endpoint = `${RESTAURANTS_ENDPOINT}/${restaurantId}`;
+
+    logRequest(functionName, endpoint, {});
+
+    try {
+        const response = await axios.delete(endpoint, {
+            headers: {Authorization: `Bearer ${token}`}
+        });
+        logResponse(functionName, endpoint, response.data);
+    } catch (error: any) {
+        logError(functionName, endpoint, error);
+        throw error;
+    }
+};
+
+export const getFlashDeals = async (
+    latitude: number,
+    longitude: number,
+    radius: number = 30,
+    token: string
+): Promise<Restaurant[]> => {
+    const functionName = 'getFlashDeals';
+    const endpoint = GET_FLASH_DEALS_ENDPOINT;
+    const payload = {latitude, longitude, radius};
+
+    logRequest(functionName, endpoint, payload);
+
+    try {
+        const response = await axios.post(endpoint, payload, {
+            headers: {Authorization: `Bearer ${token.trim()}`},
+        });
+        logResponse(functionName, endpoint, response.data);
+        return response.data.restaurants;
     } catch (error: any) {
         logError(functionName, endpoint, error);
         throw error;

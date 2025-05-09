@@ -1,16 +1,3 @@
-export interface Comment {
-    id: number;
-    user_id: number;
-    comment: string;
-    rating: number;
-    timestamp: string;
-    badges: {
-        name: string;
-        is_positive: boolean;
-    }[];
-}
-
-
 export interface Restaurant {
     id: number;
     owner_id: number;
@@ -19,30 +6,32 @@ export interface Restaurant {
     longitude: number;
     latitude: number;
     category: string;
-    workingDays: string[]; // parsed from comma-separated string
-    workingHoursStart?: string;
-    workingHoursEnd?: string;
+    workingDays: string[];
+    workingHoursStart: string;
+    workingHoursEnd: string;
     listings: number;
     rating: number | null;
     ratingCount: number;
     image_url: string | null;
     pickup: boolean;
     delivery: boolean;
-    distance_km: number | null; // may cause problems remove if necessary
+    distance_km?: number | null;
     maxDeliveryDistance: number | null;
     deliveryFee: number | null;
     minOrderAmount: number | null;
+    restaurantEmail?: string | null;
+    restaurantPhone?: string | null;
     comments?: Comment[];
-    badges?: string[]; // Add this field
-
-
+    flash_deals_available: boolean;
+    flash_deals_count: number;
 }
 
-export interface RecentRestaurant {
+export interface Comment {
+    id: number;
+    content: string;
+    rating: number;
+    user_id: number;
     restaurant_id: number;
-    restaurant_name: string;
-    image_url: string;
-    last_order_date: string;
+    created_at: string;
+    user_name: string;
 }
-
-

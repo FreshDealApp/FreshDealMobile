@@ -29,6 +29,7 @@ import {lightHaptic, strongHaptic} from "@/src/utils/Haptics";
 import {Purchase} from "@/src/types/api/purchase/model";
 import RecentOrderToast from "@/src/features/OrdersScreen/RenderOrdersToast";
 import RecentRestaurants from "@/src/features/homeScreen/components/RecentRestaurants";
+import FlashDealsBottomSheet from "@/src/features/FlashDeals/FlashDealsBottomSheet";
 
 interface HomeCardViewProps {
     onScroll: (e: NativeSyntheticEvent<NativeScrollEvent>) => void;
@@ -63,6 +64,9 @@ const HomeCardView: React.FC<HomeCardViewProps> = ({onScroll}) => {
     });
     const [refreshing, setRefreshing] = useState(false);
 
+    // Flash deals state
+    const [isFlashDealsVisible, setIsFlashDealsVisible] = useState(false);
+
     const headerOpacity = scrollY.interpolate({
         inputRange: [0, HEADER_SCROLL_DISTANCE / 2, HEADER_SCROLL_DISTANCE],
         outputRange: [1, 1, 0.9],
@@ -86,6 +90,15 @@ const HomeCardView: React.FC<HomeCardViewProps> = ({onScroll}) => {
     // Category state
     const [isCategoryModalVisible, setIsCategoryModalVisible] = useState(false);
     const [selectedCategory, setSelectedCategory] = useState("All Categories");
+
+    // Show flash deals when component mounts
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setIsFlashDealsVisible(true);
+        }, 1000);
+
+        return () => clearTimeout(timer);
+    }, []);
 
     useEffect(() => {
         if (lastCreatedPurchases && lastCreatedPurchases.length > 0) {
@@ -467,6 +480,13 @@ const HomeCardView: React.FC<HomeCardViewProps> = ({onScroll}) => {
                     </Animated.ScrollView>
                 )}
             </View>
+
+            {/* Flash Deals Bottom Sheet */}
+            <FlashDealsBottomSheet
+                isVisible={isFlashDealsVisible}
+                onClose={() => setIsFlashDealsVisible(false)}
+                onFloatingBadgePress={() => setIsFlashDealsVisible(true)}
+            />
         </View>
     );
 };

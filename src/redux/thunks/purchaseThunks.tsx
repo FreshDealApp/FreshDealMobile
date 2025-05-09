@@ -31,6 +31,7 @@ export const serializeAddressForDelivery = (address: Address): string => {
 interface CreatePurchaseOrderParams {
     isDelivery: boolean;
     notes?: string;              // Will be used as delivery_notes for both cases
+    flashDealsActivated?: boolean; // Whether to use flash deals
 }
 
 export const createPurchaseOrderAsync = createAsyncThunk<
@@ -39,7 +40,7 @@ export const createPurchaseOrderAsync = createAsyncThunk<
     { state: RootState; rejectValue: string }
 >(
     'purchase/createOrder',
-    async ({isDelivery, notes}, {getState, rejectWithValue}) => {
+    async ({isDelivery, notes, flashDealsActivated}, {getState, rejectWithValue}) => {
         try {
             const state = getState();
             const token = await tokenService.getToken();
@@ -59,7 +60,8 @@ export const createPurchaseOrderAsync = createAsyncThunk<
                 delivery_notes: notes,
                 ...(isDelivery ? {
                     delivery_address: serializeAddressForDelivery(selectedAddress)
-                } : {})
+                } : {}),
+                flashdealsactivated: flashDealsActivated
             };
             if (isDelivery && !requestData.delivery_address) {
                 console.log('Delivery address is required for delivery orders');

@@ -4,6 +4,7 @@ import {
     createRestaurant,
     deleteRestaurant,
     getAllRestaurants,
+    getFlashDeals,
     getRecentRestaurants,
     getRestaurant,
     getRestaurantBadges,
@@ -268,6 +269,42 @@ export const getRestaurantCommentsThunk = createAsyncThunk(
                 error.message ||
                 'Failed to fetch restaurant comments'
             );
+        }
+    }
+);
+
+export const getFlashDealsThunk = createAsyncThunk<
+    Restaurant[],
+    void,
+    { state: RootState; rejectValue: string }
+>(
+    'restaurant/getFlashDeals',
+    async (_, {rejectWithValue, getState}) => {
+        try {
+            const address = getState().address.addresses.find(
+                (address) => address.is_primary
+            );
+            if (!address) {
+                console.error('Primary address is missing.');
+                return rejectWithValue('Primary address is missing.');
+            }
+
+            const token = await tokenService.getToken();
+            if (!token) {
+                console.error('Authentication token is missing.');
+                return rejectWithValue('Authentication token is missing.');
+            }
+
+            const radius = 30; // Default radius for flash deals
+            const data = await getFlashDeals(
+                address.latitude,
+                address.longitude,
+                radius,
+                token
+            );
+            return data as Restaurant[];
+        } catch (error: any) {
+            return rejectWithValue('Failed to fetch flash deals: ' + error.message);
         }
     }
 );

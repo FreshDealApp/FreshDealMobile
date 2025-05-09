@@ -17,14 +17,13 @@ const {width} = Dimensions.get('window');
 
 interface ListingCardProps {
     listingList?: Listing[];
-    viewType?: 'cube' | 'rectangle';  // Add this line
+    viewType?: 'cube' | 'rectangle';
 }
 
 export const ListingCard: React.FC<ListingCardProps> = ({
                                                             listingList,
-                                                            viewType = 'cube'  // Default to cube view
+                                                            viewType = 'cube'
                                                         }) => {
-    // Get the shared scroll context
     const {scrollY, headerHeight} = useContext(ScrollContext);
 
     const [selectedListing, setSelectedListing] = useState<Listing | null>(null);
@@ -52,11 +51,15 @@ export const ListingCard: React.FC<ListingCardProps> = ({
         return isPickup ? item.pick_up_price : item.delivery_price;
     }, [isPickup]);
 
+    const getFreshScoreColor = (score: number) => {
+        if (score >= 80) return '#059669';
+        if (score >= 50) return '#F59E0B';
+        return '#DC2626';
+    };
+
     const handleListingPress = useCallback((listing: Listing) => {
         lightHaptic();
-        // Set the state first
         setSelectedListing(listing);
-        // Use setTimeout to ensure state is updated before presenting
         setTimeout(() => {
             bottomSheetRef.current?.present();
         }, 0);
@@ -137,6 +140,22 @@ export const ListingCard: React.FC<ListingCardProps> = ({
 
                     <View style={styles.modalHeader}>
                         <Text style={styles.modalTitle}>{selectedListing.title}</Text>
+                        <View
+                            style={[styles.freshScoreBadge, {
+                                backgroundColor: getFreshScoreColor(selectedListing.fresh_score) === '#059669' ? '#ECFDF5' : getFreshScoreColor(selectedListing.fresh_score) === '#F59E0B' ? '#FEF3C7' : '#FEE2E2',
+                                borderColor: getFreshScoreColor(selectedListing.fresh_score)
+                            }]}>
+                            <Icon
+                                name="leaf"
+                                size={16}
+                                color={getFreshScoreColor(selectedListing.fresh_score)}
+                                style={styles.freshScoreIcon}
+                            />
+                            <Text
+                                style={[styles.freshScoreText, {color: getFreshScoreColor(selectedListing.fresh_score)}]}>
+                                {Math.round(selectedListing.fresh_score)}% Fresh
+                            </Text>
+                        </View>
                         <View style={styles.consumeWithinBadge}>
                             <Icon name="clock-outline" size={20} color="#DC2626"/>
                             <Text style={styles.consumeWithinText}>
@@ -228,11 +247,24 @@ export const ListingCard: React.FC<ListingCardProps> = ({
                         ]}
                         resizeMode="cover"
                     />
-                    {discountPercentage > 0 && (
-                        <View style={styles.discountBadge}>
-                            <Text style={styles.discountText}>-{discountPercentage}%</Text>
-                        </View>
-                    )}
+                    <View
+                        style={[styles.freshScoreBadgeSmall, {
+                            backgroundColor: getFreshScoreColor(item.fresh_score) === '#059669' ? '#ECFDF5' : getFreshScoreColor(item.fresh_score) === '#F59E0B' ? '#FEF3C7' : '#FEE2E2',
+                            borderColor: getFreshScoreColor(item.fresh_score)
+                        }]}>
+                        <Icon
+                            name="leaf"
+                            size={10}
+                            color={getFreshScoreColor(item.fresh_score)}
+                            style={styles.freshScoreIconSmall}
+                        />
+                        <Text style={[styles.freshScoreSmallText, {
+                            color: getFreshScoreColor(item.fresh_score),
+                            fontWeight: '700'
+                        }]}>
+                            {Math.round(item.fresh_score)}% Fresh
+                        </Text>
+                    </View>
                     <View style={[
                         styles.cardContent,
                         viewType === 'rectangle' && styles.cardContentRectangle
@@ -243,12 +275,17 @@ export const ListingCard: React.FC<ListingCardProps> = ({
 
                         <View style={styles.priceAndCartContainer}>
                             <View style={styles.priceContainer}>
-                                <Text style={styles.currentPrice}>
-                                    {displayPrice} TL
-                                </Text>
                                 {item.original_price > displayPrice && (
                                     <Text style={styles.originalPrice}>
                                         {item.original_price} TL
+                                    </Text>
+                                )}
+                                <Text style={styles.currentPrice}>
+                                    {displayPrice} TL
+                                </Text>
+                                {item.original_price > displayPrice && viewType === 'rectangle' && (
+                                    <Text style={styles.savingsText}>
+                                        Save {discountPercentage}%
                                     </Text>
                                 )}
                             </View>
@@ -290,7 +327,7 @@ export const ListingCard: React.FC<ListingCardProps> = ({
         <View style={styles.container}>
             <Animated.FlatList
                 contentContainerStyle={{
-                    paddingTop: headerHeight || 0, // Add padding equal to header height
+                    paddingTop: headerHeight || 0,
                 }}
                 data={listings}
                 renderItem={renderListingItem}
@@ -298,7 +335,6 @@ export const ListingCard: React.FC<ListingCardProps> = ({
                 numColumns={viewType === 'cube' ? 2 : 1}
                 columnWrapperStyle={viewType === 'cube' ? styles.columnWrapper : undefined}
                 showsVerticalScrollIndicator={false}
-                // Connect to shared scroll animation
                 onScroll={Animated.event(
                     [{nativeEvent: {contentOffset: {y: scrollY}}}],
                     {useNativeDriver: true}
@@ -382,19 +418,31 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         backgroundColor: '#FFFFFF',
     },
-    discountBadge: {
+    freshScoreBadgeSmall: {
         position: 'absolute',
-        left: 8,
+        right: 8,
         top: 8,
-        backgroundColor: '#DC2626',
         borderRadius: 12,
         paddingHorizontal: 8,
         paddingVertical: 4,
+        flexDirection: 'row',
+        alignItems: 'center',
+        shadowColor: '#000',
+        shadowOffset: {width: 0, height: 1},
+        shadowOpacity: 0.2,
+        shadowRadius: 2,
+        elevation: 2,
+        borderWidth: 1,
     },
-    discountText: {
-        color: '#FFFFFF',
+    freshScoreIconSmall: {
+        marginRight: 2,
+    },
+    freshScoreSmallText: {
         fontSize: 12,
         fontWeight: '600',
+    },
+    freshScoreIcon: {
+        marginRight: 4,
     },
     bottomSheetContainer: {
         position: 'absolute',
@@ -419,7 +467,13 @@ const styles = StyleSheet.create({
         fontSize: 14,
         color: '#9CA3AF',
         textDecorationLine: 'line-through',
-        marginLeft: 4,
+        marginBottom: 2,
+    },
+    savingsText: {
+        color: '#059669',
+        fontSize: 12,
+        fontWeight: '500',
+        marginTop: 2,
     },
     itemCartCount: {
         fontSize: 14,
@@ -525,6 +579,33 @@ const styles = StyleSheet.create({
         color: '#1F2937',
         marginBottom: 12,
     },
+    freshScoreContainer: {
+        marginBottom: 8,
+    },
+    freshScorePill: {
+        borderRadius: 12,
+        paddingHorizontal: 8,
+        paddingVertical: 4,
+        alignSelf: 'flex-start',
+    },
+    freshScoreValue: {
+        fontSize: 12,
+        fontWeight: '600',
+    },
+    freshScoreBadge: {
+        borderRadius: 12,
+        paddingHorizontal: 12,
+        paddingVertical: 6,
+        marginBottom: 8,
+        alignSelf: 'flex-start',
+        flexDirection: 'row',
+        alignItems: 'center',
+        borderWidth: 1,
+    },
+    freshScoreText: {
+        fontSize: 14,
+        fontWeight: '700',
+    },
     consumeWithinBadge: {
         flexDirection: 'row',
         alignItems: 'center',
@@ -559,11 +640,6 @@ const styles = StyleSheet.create({
         borderRadius: 8,
         borderWidth: 1,
         borderColor: '#059669',
-    },
-    savingsText: {
-        color: '#059669',
-        fontSize: 14,
-        fontWeight: '600',
     },
     modalOriginalPrice: {
         fontSize: 16,

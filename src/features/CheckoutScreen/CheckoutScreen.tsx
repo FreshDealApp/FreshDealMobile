@@ -4,7 +4,7 @@ import {useDispatch, useSelector} from 'react-redux';
 import {RootState} from '@/src/types/store';
 import {AppDispatch} from '@/src/redux/store';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
-import {MaterialIcons} from '@expo/vector-icons';
+import {MaterialCommunityIcons, MaterialIcons} from '@expo/vector-icons';
 import {differenceInMinutes, format, isAfter, isBefore, setHours, setMinutes} from 'date-fns';
 import {GoBackIcon} from "@/src/features/homeScreen/components/goBack";
 import {complexHaptic, lightHaptic} from "@/src/utils/Haptics";
@@ -32,6 +32,7 @@ const CheckoutScreen: React.FC = () => {
     const [paymentMethod, setPaymentMethod] = useState<'card' | 'cash' | null>(null);
     const [deliveryNotes, setDeliveryNotes] = useState('');
     const [isCardAdded, setIsCardAdded] = useState(false);
+    const [flashDealsEnabled, setFlashDealsEnabled] = useState(false);
     const fadeAnim = new Animated.Value(0);
 
     const currentDate = new Date();
@@ -90,7 +91,28 @@ const CheckoutScreen: React.FC = () => {
 
     const currentTotal = isPickup ? totalPickUpPrice : totalDeliveryPrice;
     const deliveryFee = !isPickup ? restaurant?.deliveryFee || 0 : 0;
-    const finalTotal = currentTotal + deliveryFee;
+    const subtotal = currentTotal + deliveryFee;
+
+    // Calculate Flash Deal discount
+    const calculateFlashDealDiscount = () => {
+        if (!flashDealsEnabled || !restaurant.flash_deals_available) return 0;
+
+        if (subtotal >= 400) return 150;
+        if (subtotal >= 250) return 100;
+        if (subtotal >= 200) return 75;
+        if (subtotal >= 150) return 50;
+
+        return 0;
+    };
+
+    const flashDealDiscount = calculateFlashDealDiscount();
+    const finalTotal = subtotal - flashDealDiscount;
+
+    const toggleFlashDeals = () => {
+        if (restaurant.flash_deals_available) {
+            setFlashDealsEnabled(!flashDealsEnabled);
+        }
+    };
 
     const handlePaymentMethodSelect = (method: 'card' | 'cash') => {
         lightHaptic().then(r => console.log(r));
@@ -128,6 +150,7 @@ const CheckoutScreen: React.FC = () => {
             await dispatch(createPurchaseOrderAsync({
                 isDelivery: !isPickup,
                 notes: deliveryNotes ? deliveryNotes : " ",
+                flashDealsActivated: flashDealsEnabled
             }));
 
             await complexHaptic();
@@ -279,6 +302,43 @@ const CheckoutScreen: React.FC = () => {
                                 <Text style={styles.summaryLabel}>Delivery Fee</Text>
                                 <Text style={styles.summaryValue}>{restaurant.deliveryFee.toFixed(2)} TL</Text>
                             </View>
+                        )}
+
+                        {restaurant.flash_deals_available && (
+                            <>
+                                <View style={styles.flashDealsContainer}>
+                                    <View style={styles.flashDealsHeader}>
+                                        <MaterialCommunityIcons name="flash" size={24} color="#FF5252"/>
+                                        <Text style={styles.flashDealsTitle}>Flash Deals</Text>
+                                        <TouchableOpacity
+                                            style={[styles.flashDealsToggle, flashDealsEnabled && styles.flashDealsToggleActive]}
+                                            onPress={toggleFlashDeals}
+                                        >
+                                            <Text
+                                                style={[styles.flashDealsToggleText, flashDealsEnabled && styles.flashDealsToggleTextActive]}>
+                                                {flashDealsEnabled ? 'ON' : 'OFF'}
+                                            </Text>
+                                        </TouchableOpacity>
+                                    </View>
+
+                                    <Text style={styles.flashDealsDescription}>
+                                        Flash Deals provide discounts based on order total:
+                                    </Text>
+                                    <View style={styles.flashDealsDiscountList}>
+                                        <Text style={styles.flashDealsDiscountItem}>• 150+ TL: 50 TL off</Text>
+                                        <Text style={styles.flashDealsDiscountItem}>• 200+ TL: 75 TL off</Text>
+                                        <Text style={styles.flashDealsDiscountItem}>• 250+ TL: 100 TL off</Text>
+                                        <Text style={styles.flashDealsDiscountItem}>• 400+ TL: 150 TL off</Text>
+                                    </View>
+
+                                    {flashDealsEnabled && flashDealDiscount > 0 && (
+                                        <View style={styles.summaryRow}>
+                                            <Text style={styles.discountLabel}>Flash Deal Discount</Text>
+                                            <Text style={styles.discountValue}>-{flashDealDiscount.toFixed(2)} TL</Text>
+                                        </View>
+                                    )}
+                                </View>
+                            </>
                         )}
                     </View>
 
@@ -643,6 +703,73 @@ const styles = StyleSheet.create({
         height: 1,
         backgroundColor: '#F3F4F6',
         marginVertical: 12,
+    },
+    flashDealsContainer: {
+        marginTop: 12,
+        padding: 12,
+        backgroundColor: '#FFF9F9',
+        borderRadius: 10,
+        borderWidth: 1,
+        borderColor: '#FFEEEE',
+    },
+    flashDealsHeader: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: 8,
+    },
+    flashDealsTitle: {
+        fontSize: 16,
+        fontWeight: '600',
+        color: '#FF5252',
+        marginLeft: 8,
+        flex: 1,
+        fontFamily: 'Poppins-SemiBold',
+    },
+    flashDealsToggle: {
+        backgroundColor: '#F5F5F5',
+        paddingHorizontal: 12,
+        paddingVertical: 4,
+        borderRadius: 12,
+    },
+    flashDealsToggleActive: {
+        backgroundColor: '#FFD7D7',
+    },
+    flashDealsToggleText: {
+        fontSize: 12,
+        fontWeight: '600',
+        color: '#777',
+        fontFamily: 'Poppins-SemiBold',
+    },
+    flashDealsToggleTextActive: {
+        color: '#FF5252',
+    },
+    flashDealsDescription: {
+        fontSize: 14,
+        color: '#555',
+        marginBottom: 8,
+        fontFamily: 'Poppins-Regular',
+    },
+    flashDealsDiscountList: {
+        marginBottom: 8,
+    },
+    flashDealsDiscountItem: {
+        fontSize: 13,
+        color: '#666',
+        marginBottom: 4,
+        fontFamily: 'Poppins-Regular',
+    },
+    discountLabel: {
+        fontSize: 15,
+        color: '#FF5252',
+        fontWeight: '600',
+        fontFamily: 'Poppins-SemiBold',
+        flex: 1,
+    },
+    discountValue: {
+        fontSize: 15,
+        color: '#FF5252',
+        fontWeight: '600',
+        fontFamily: 'Poppins-SemiBold',
     },
 });
 

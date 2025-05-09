@@ -1,3 +1,4 @@
+// src/types/api/listing/model.ts
 export interface Listing {
     id: number;
     restaurant_id: number;
@@ -11,4 +12,5 @@ export interface Listing {
     consume_within: number | null;
     available_for_pickup: boolean | null;
     available_for_delivery: boolean | null;
+    fresh_score: number;
 }
